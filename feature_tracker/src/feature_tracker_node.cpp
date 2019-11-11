@@ -62,6 +62,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         PUB_THIS_FRAME = false;
 
     cv_bridge::CvImageConstPtr ptr;
+    cv::Mat ret_img; 
     if (img_msg->encoding == "8UC1")
     {
         sensor_msgs::Image img;
@@ -73,26 +74,42 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         img.data = img_msg->data;
         img.encoding = "mono8";
         ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8);
-    }
-    else
+	ret_img = ptr->image; 
+    }else if(img_msg->encoding == "8UC3"){
+	sensor_msgs::Image img;
+	img.header = img_msg->header;
+	img.height = img_msg->height;
+	img.width = img_msg->width;
+	img.is_bigendian = img_msg->is_bigendian;
+	img.step = img_msg->step;
+	img.data = img_msg->data;
+	img.encoding = "bgr8";
+	ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
+	ret_img = ptr->image.clone(); 
+	cv::cvtColor(ret_img, ret_img, cv::COLOR_BGR2GRAY);
+    }else{
         ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::MONO8);
-
-    cv::Mat show_img = ptr->image;
+	ret_img = ptr->image; 
+    }
+    cv::Mat show_img = ret_img; // ptr->image;
     TicToc t_r;
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
         ROS_DEBUG("processing camera %d", i);
         if (i != 1 || !STEREO_TRACK)
-            trackerData[i].readImage(ptr->image.rowRange(ROW * i, ROW * (i + 1)), img_msg->header.stamp.toSec());
+            // trackerData[i].readImage(ptr->image.rowRange(ROW * i, ROW * (i + 1)), img_msg->header.stamp.toSec());
+	    trackerData[i].readImage(ret_img, img_msg->header.stamp.toSec());
         else
         {
             if (EQUALIZE)
             {
                 cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
-                clahe->apply(ptr->image.rowRange(ROW * i, ROW * (i + 1)), trackerData[i].cur_img);
+                // clahe->apply(ptr->image.rowRange(ROW * i, ROW * (i + 1)), trackerData[i].cur_img);
+		clahe->apply(ret_img, trackerData[i].cur_img);
             }
             else
-                trackerData[i].cur_img = ptr->image.rowRange(ROW * i, ROW * (i + 1));
+                // trackerData[i].cur_img = ptr->image.rowRange(ROW * i, ROW * (i + 1));
+		trackerData[i].cur_img = ret_img;
         }
 
 #if SHOW_UNDISTORTION
