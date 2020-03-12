@@ -1,3 +1,9 @@
+To run VINS-Mono using structure core's data by: 
+
+1. enter the foloder: vins_estimator/launch  
+2. roslaunch struct_core.launch  
+3. publish structure core's bag file by: rosbag play xx.bag
+
 # VINS-Mono
 ## A Robust and Versatile Monocular Visual-Inertial State Estimator
 
