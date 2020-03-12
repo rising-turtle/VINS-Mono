@@ -117,19 +117,38 @@ void Estimator::processIMU(double dt, const Vector3d &linear_acceleration, const
     gyr_0 = angular_velocity;
 }
 
+void Estimator::showStatus()
+{
+    cout<<"Estimator.cpp: showStatus: Poses: "<<endl; 
+    for(int i=0; i<=frame_count; i++){
+        cout << "Ps["<<i<<"]:"<< Ps[i].transpose()<<endl;
+    }
+    for(int i=0; i<=frame_count; i++){
+        cout << "Vs["<<i<<"]:"<< Vs[i].transpose()<<endl;
+    }
+    for(int i=0; i<=frame_count; i++){
+        cout << "Ba["<<i<<"]:"<< Bas[i].transpose()<<endl;
+    }
+    for(int i=0; i<=frame_count; i++){
+        cout << "Bg["<<i<<"]:"<< Bgs[i].transpose()<<endl;
+    }
+
+}
+
+
 void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> &image, const std_msgs::Header &header)
 {
-    ROS_DEBUG("new image coming ------------------------------------------");
-    ROS_DEBUG("Adding feature points %lu", image.size());
+    // ROS_DEBUG("new image coming ------------------------------------------");
+    ROS_DEBUG("timestamp %lf with feature points %lu", header.stamp.toSec(),  image.size());
     if (f_manager.addFeatureCheckParallax(frame_count, image, td))
         marginalization_flag = MARGIN_OLD;
     else
         marginalization_flag = MARGIN_SECOND_NEW;
 
-    ROS_DEBUG("this frame is--------------------%s", marginalization_flag ? "reject" : "accept");
-    ROS_DEBUG("%s", marginalization_flag ? "Non-keyframe" : "Keyframe");
+    // ROS_DEBUG("this frame is--------------------%s", marginalization_flag ? "reject" : "accept");
+    ROS_DEBUG("handle frame at timestamp %lf is a %s", header.stamp.toSec(), marginalization_flag ? "Non-keyframe" : "Keyframe");
     ROS_DEBUG("Solving %d", frame_count);
-    ROS_DEBUG("number of feature: %d", f_manager.getFeatureCount());
+    ROS_INFO("timestamp %lf number of feature: %d", header.stamp.toSec(),  f_manager.getFeatureCount());
     Headers[frame_count] = header;
 
     ImageFrame imageframe(image, header.stamp.toSec());
@@ -157,6 +176,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
 
     if (solver_flag == INITIAL)
     {
+        cout<<"estimator.cpp: at frame_count: "<<frame_count<<" feature_manager has: "<<f_manager.feature.size()<<endl;
         if (frame_count == WINDOW_SIZE)
         {
             bool result = false;
@@ -168,6 +188,10 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
             if(result)
             {
                 solver_flag = NON_LINEAR;
+		  // print its result for debug 
+                ROS_INFO("Initialization finish!");
+                showStatus();
+				
                 solveOdometry();
                 slideWindow();
                 f_manager.removeFailures();
@@ -178,8 +202,10 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
                 last_P0 = Ps[0];
                 
             }
-            else
+            else{
                 slideWindow();
+		  cout<<"estimator.cpp: after slide window feature_manager has: "<<f_manager.feature.size()<<" features!"<<endl;
+            }
         }
         else
             frame_count++;
@@ -273,6 +299,7 @@ bool Estimator::initialStructure()
         ROS_INFO("Not enough features or parallax; Move device around");
         return false;
     }
+    cout<<"estimator.cpp: sfm_f has: "<<sfm_f.size()<<" features!"<<endl;
     GlobalSFM sfm;
     if(!sfm.construct(frame_count + 1, Q, T, l,
               relative_R, relative_T,
@@ -296,6 +323,8 @@ bool Estimator::initialStructure()
             frame_it->second.is_key_frame = true;
             frame_it->second.R = Q[i].toRotationMatrix() * RIC[0].transpose();
             frame_it->second.T = T[i];
+	     cout<<"Q["<<i<<"]: "<<Q[i].vec()<<endl;
+	     cout<<"R: "<<endl<<frame_it->second.R<<endl;
             i++;
             continue;
         }
@@ -349,6 +378,7 @@ bool Estimator::initialStructure()
         cv::cv2eigen(t, T_pnp);
         T_pnp = R_pnp * (-T_pnp);
         frame_it->second.R = R_pnp * RIC[0].transpose();
+	 cout<<"R_pnp: "<<endl<<R_pnp<<endl;
         frame_it->second.T = T_pnp;
     }
     if (visualInitialAlign())
@@ -463,6 +493,7 @@ bool Estimator::relativePose(Matrix3d &relative_R, Vector3d &relative_T, int &l)
             {
                 l = i;
                 ROS_DEBUG("average_parallax %f choose l %d and newest frame to triangulate the whole structure", average_parallax * 460, l);
+                ROS_INFO("estimator.cpp: corres has %d pairs", corres.size());
                 return true;
             }
         }

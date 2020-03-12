@@ -205,7 +205,7 @@ bool MotionEstimator::solveRelativeRT(const vector<pair<Vector3d, Vector3d>> &co
         cv::Mat cameraMatrix = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
         cv::Mat rot, trans;
         int inlier_cnt = cv::recoverPose(E, ll, rr, cameraMatrix, rot, trans, mask);
-        //cout << "inlier_cnt " << inlier_cnt << endl;
+        cout << "solve_5pts.cpp: in solveRelativeRT(): inlier_cnt " << inlier_cnt << endl;
 
         Eigen::Matrix3d R;
         Eigen::Vector3d T;
@@ -218,8 +218,13 @@ bool MotionEstimator::solveRelativeRT(const vector<pair<Vector3d, Vector3d>> &co
 
         Rotation = R.transpose();
         Translation = -R.transpose() * T;
-        if(inlier_cnt > 12)
+        if(inlier_cnt > 12){
+
+            ROS_WARN("---------------5points----------------");
+            ROS_WARN("input points %d inliers %d", ll.size(), inlier_cnt); 
+
             return true;
+        }
         else
             return false;
     }

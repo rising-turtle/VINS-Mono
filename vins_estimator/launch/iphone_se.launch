@@ -1,6 +1,6 @@
 
 <launch>
-    <arg name="config_path" default = "$(find feature_tracker)/../config/struct_core_config.yaml" />
+    <arg name="config_path" default = "$(find feature_tracker)/../config/iphone_se.yaml" />
     <arg name="vins_path" default = "$(find feature_tracker)/../config/../" />
     
     <node name="feature_tracker" pkg="feature_tracker" type="feature_tracker" output="screen">

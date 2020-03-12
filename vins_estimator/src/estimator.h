@@ -50,6 +50,8 @@ class Estimator
     bool failureDetection();
 
 
+    void showStatus(); 
+
     enum SolverFlag
     {
         INITIAL,

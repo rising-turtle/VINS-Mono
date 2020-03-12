@@ -19,6 +19,9 @@ void solveGyroscopeBias(map<double, ImageFrame> &all_image_frame, Vector3d* Bgs)
         Eigen::Quaterniond q_ij(frame_i->second.R.transpose() * frame_j->second.R);
         tmp_A = frame_j->second.pre_integration->jacobian.template block<3, 3>(O_R, O_BG);
         tmp_b = 2 * (frame_j->second.pre_integration->delta_q.inverse() * q_ij).vec();
+	cout<<"tmpA: "<<endl<<tmp_A<<endl;
+	cout<<"tmp_b: "<<tmp_b.transpose()<<endl; 
+	cout<<"qij: "<<q_ij.vec()<<endl;
         A += tmp_A.transpose() * tmp_A;
         b += tmp_A.transpose() * tmp_b;
 

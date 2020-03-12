@@ -50,6 +50,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     // frequency control
     if (round(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time)) <= FREQ)
     {
+       ROS_INFO("feature_node: first_image_time: %lf current_time: %lf now publish", first_image_time, img_msg->header.stamp.toSec());
         PUB_THIS_FRAME = true;
         // reset the frequency control
         if (abs(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time) - FREQ) < 0.01 * FREQ)
@@ -95,7 +96,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     TicToc t_r;
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
-        ROS_DEBUG("processing camera %d", i);
+        // ROS_DEBUG("processing camera %d", i);
         if (i != 1 || !STEREO_TRACK)
             // trackerData[i].readImage(ptr->image.rowRange(ROW * i, ROW * (i + 1)), img_msg->header.stamp.toSec());
 	    trackerData[i].readImage(ret_img, img_msg->header.stamp.toSec());
@@ -172,7 +173,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         feature_points->channels.push_back(v_of_point);
         feature_points->channels.push_back(velocity_x_of_point);
         feature_points->channels.push_back(velocity_y_of_point);
-        ROS_DEBUG("publish %f, at %f", feature_points->header.stamp.toSec(), ros::Time::now().toSec());
+        ROS_INFO("publish %f, at %f with %d features ", feature_points->header.stamp.toSec(), ros::Time::now().toSec(),   feature_points->points.size());
         // skip the first image; since no optical speed on frist image
         if (!init_pub)
         {
@@ -217,14 +218,14 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
             pub_match.publish(ptr->toImageMsg());
         }
     }
-    ROS_INFO("whole feature tracker processing costs: %f", t_r.toc());
+    // ROS_INFO("whole feature tracker processing costs: %f", t_r.toc());
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "feature_tracker");
     ros::NodeHandle n("~");
-    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
+    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug); // Debug Info
     readParameters(n);
 
     for (int i = 0; i < NUM_OF_CAM; i++)

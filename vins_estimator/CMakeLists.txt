@@ -33,25 +33,8 @@ include_directories(
 catkin_package()
 
 add_executable(vins_estimator
-    src/estimator_node.cpp
-    src/parameters.cpp
-    src/estimator.cpp
-    src/feature_manager.cpp
-    src/factor/pose_local_parameterization.cpp
-    src/factor/projection_factor.cpp
-    src/factor/projection_td_factor.cpp
-    src/factor/marginalization_factor.cpp
-    src/utility/utility.cpp
-    src/utility/visualization.cpp
-    src/utility/CameraPoseVisualization.cpp
-    src/initial/solve_5pts.cpp
-    src/initial/initial_aligment.cpp
-    src/initial/initial_sfm.cpp
-    src/initial/initial_ex_rotation.cpp
-    )
-
-add_executable(vins_estimator_ss
     src/estimator_node_ss.cpp
+    # src/estimator_node.cpp
     src/parameters.cpp
     src/estimator.cpp
     src/feature_manager.cpp
@@ -71,4 +54,4 @@ add_executable(vins_estimator_ss
 
 target_link_libraries(vins_estimator ${catkin_LIBRARIES} ${OpenCV_LIBS} ${CERES_LIBRARIES}) 
 
-target_link_libraries(vins_estimator_ss ${catkin_LIBRARIES} ${OpenCV_LIBS} ${CERES_LIBRARIES})
+

@@ -121,7 +121,8 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
         reduceVector(ids, status);
         reduceVector(cur_un_pts, status);
         reduceVector(track_cnt, status);
-        ROS_DEBUG("temporal optical flow costs: %fms", t_o.toc());
+	 ROS_INFO("KLT track %d features", forw_pts.size()); 
+        // ROS_DEBUG("temporal optical flow costs: %fms", t_o.toc());
     }
 
     for (auto &n : track_cnt)
@@ -150,12 +151,13 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
         }
         else
             n_pts.clear();
-        ROS_DEBUG("detect feature costs: %fms", t_t.toc());
+	 ROS_INFO("MAX_CNT: %d fort_pts.size(): %d", MAX_CNT, forw_pts.size() );
+        ROS_DEBUG("detect feature costs: %fms max_cnt: %d detect %d new features ", t_t.toc(), n_max_cnt, n_pts.size());
 
-        ROS_DEBUG("add feature begins");
+        // ROS_DEBUG("add feature begins");
         TicToc t_a;
         addPoints();
-        ROS_DEBUG("selectFeature costs: %fms", t_a.toc());
+        // ROS_DEBUG("selectFeature costs: %fms", t_a.toc());
     }
     prev_img = cur_img;
     prev_pts = cur_pts;

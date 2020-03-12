@@ -45,7 +45,8 @@ int FeatureManager::getFeatureCount()
 bool FeatureManager::addFeatureCheckParallax(int frame_count, const map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> &image, double td)
 {
     ROS_DEBUG("input feature: %d", (int)image.size());
-    ROS_DEBUG("num of feature: %d", getFeatureCount());
+    // ROS_DEBUG("num of feature: %d", getFeatureCount());
+    ROS_WARN("before addFeatureCheckParallax num of feature: %d total feature: %d", getFeatureCount(), feature.size());
     double parallax_sum = 0;
     int parallax_num = 0;
     last_track_num = 0;
@@ -71,6 +72,8 @@ bool FeatureManager::addFeatureCheckParallax(int frame_count, const map<int, vec
         }
     }
 
+    ROS_INFO("after addFeatureCheckParallax num of feature: %d last_track_num: %d", getFeatureCount(), last_track_num);
+	
     if (frame_count < 2 || last_track_num < 20)
         return true;
 
@@ -274,6 +277,8 @@ void FeatureManager::removeOutlier()
 
 void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3d marg_P, Eigen::Matrix3d new_R, Eigen::Vector3d new_P)
 {
+    int cnt_invalid_depth = 0; 
+    int cnt_deleted_feat = 0;
     for (auto it = feature.begin(), it_next = feature.begin();
          it != feature.end(); it = it_next)
     {
@@ -288,6 +293,7 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
             if (it->feature_per_frame.size() < 2)
             {
                 feature.erase(it);
+		  ++cnt_deleted_feat; 
                 continue;
             }
             else
@@ -298,8 +304,10 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
                 double dep_j = pts_j(2);
                 if (dep_j > 0)
                     it->estimated_depth = dep_j;
-                else
+                else{
                     it->estimated_depth = INIT_DEPTH;
+		      ++cnt_invalid_depth; 
+                }
             }
         }
         // remove tracking-lost feature after marginalize
@@ -310,6 +318,7 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
         }
         */
     }
+   // ROS_WARN("feature_manager.cpp: number of feature depth invalid %d, number of feature to be deleted: %d", cnt_invalid_depth, cnt_deleted_feat);
 }
 
 void FeatureManager::removeBack()
