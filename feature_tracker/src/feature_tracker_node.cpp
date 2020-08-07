@@ -38,7 +38,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     if (img_msg->header.stamp.toSec() - last_image_time > 1.0 || img_msg->header.stamp.toSec() < last_image_time)
     {
         ROS_WARN("image discontinue! reset the feature tracker!");
-        first_image_flag = true; 
+        first_image_flag = true;
         last_image_time = 0;
         pub_count = 1;
         std_msgs::Bool restart_flag;
@@ -50,7 +50,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     // frequency control
     if (round(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time)) <= FREQ)
     {
-       ROS_INFO("feature_node: first_image_time: %lf current_time: %lf now publish", first_image_time, img_msg->header.stamp.toSec());
+       // ROS_INFO("feature_node: first_image_time: %lf current_time: %lf now publish", first_image_time, img_msg->header.stamp.toSec());
         PUB_THIS_FRAME = true;
         // reset the frequency control
         if (abs(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time) - FREQ) < 0.01 * FREQ)
@@ -63,7 +63,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         PUB_THIS_FRAME = false;
 
     cv_bridge::CvImageConstPtr ptr;
-    cv::Mat ret_img; 
+    cv::Mat ret_img;
     if (img_msg->encoding == "8UC1")
     {
         sensor_msgs::Image img;
@@ -75,7 +75,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         img.data = img_msg->data;
         img.encoding = "mono8";
         ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8);
-	ret_img = ptr->image; 
+	ret_img = ptr->image;
     }else if(img_msg->encoding == "8UC3"){
 	sensor_msgs::Image img;
 	img.header = img_msg->header;
@@ -86,11 +86,11 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
 	img.data = img_msg->data;
 	img.encoding = "bgr8";
 	ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
-	ret_img = ptr->image.clone(); 
+	ret_img = ptr->image.clone();
 	cv::cvtColor(ret_img, ret_img, cv::COLOR_BGR2GRAY);
     }else{
         ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::MONO8);
-	ret_img = ptr->image; 
+	ret_img = ptr->image;
     }
     cv::Mat show_img = ret_img; // ptr->image;
     TicToc t_r;
@@ -173,7 +173,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         feature_points->channels.push_back(v_of_point);
         feature_points->channels.push_back(velocity_x_of_point);
         feature_points->channels.push_back(velocity_y_of_point);
-        ROS_INFO("publish %f, at %f with %d features ", feature_points->header.stamp.toSec(), ros::Time::now().toSec(),   feature_points->points.size());
+        // ROS_INFO("publish %f, at %f with %d features ", feature_points->header.stamp.toSec(), ros::Time::now().toSec(),   feature_points->points.size());
         // skip the first image; since no optical speed on frist image
         if (!init_pub)
         {
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "feature_tracker");
     ros::NodeHandle n("~");
-    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug); // Debug Info
+    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info); // Debug Info
     readParameters(n);
 
     for (int i = 0; i < NUM_OF_CAM; i++)

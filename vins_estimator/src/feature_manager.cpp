@@ -46,7 +46,7 @@ bool FeatureManager::addFeatureCheckParallax(int frame_count, const map<int, vec
 {
     ROS_DEBUG("input feature: %d", (int)image.size());
     // ROS_DEBUG("num of feature: %d", getFeatureCount());
-    ROS_WARN("before addFeatureCheckParallax num of feature: %d total feature: %d", getFeatureCount(), feature.size());
+    // ROS_WARN("before addFeatureCheckParallax num of feature: %d total feature: %d", getFeatureCount(), feature.size());
     double parallax_sum = 0;
     int parallax_num = 0;
     last_track_num = 0;
@@ -72,8 +72,8 @@ bool FeatureManager::addFeatureCheckParallax(int frame_count, const map<int, vec
         }
     }
 
-    ROS_INFO("after addFeatureCheckParallax num of feature: %d last_track_num: %d", getFeatureCount(), last_track_num);
-	
+    // ROS_INFO("after addFeatureCheckParallax num of feature: %d last_track_num: %d", getFeatureCount(), last_track_num);
+
     if (frame_count < 2 || last_track_num < 20)
         return true;
 
@@ -134,7 +134,7 @@ vector<pair<Vector3d, Vector3d>> FeatureManager::getCorresponding(int frame_coun
             a = it.feature_per_frame[idx_l].point;
 
             b = it.feature_per_frame[idx_r].point;
-            
+
             corres.push_back(make_pair(a, b));
         }
     }
@@ -277,7 +277,7 @@ void FeatureManager::removeOutlier()
 
 void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3d marg_P, Eigen::Matrix3d new_R, Eigen::Vector3d new_P)
 {
-    int cnt_invalid_depth = 0; 
+    int cnt_invalid_depth = 0;
     int cnt_deleted_feat = 0;
     for (auto it = feature.begin(), it_next = feature.begin();
          it != feature.end(); it = it_next)
@@ -288,12 +288,12 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
             it->start_frame--;
         else
         {
-            Eigen::Vector3d uv_i = it->feature_per_frame[0].point;  
+            Eigen::Vector3d uv_i = it->feature_per_frame[0].point;
             it->feature_per_frame.erase(it->feature_per_frame.begin());
             if (it->feature_per_frame.size() < 2)
             {
                 feature.erase(it);
-		  ++cnt_deleted_feat; 
+		            ++cnt_deleted_feat;
                 continue;
             }
             else
@@ -306,7 +306,7 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
                     it->estimated_depth = dep_j;
                 else{
                     it->estimated_depth = INIT_DEPTH;
-		      ++cnt_invalid_depth; 
+		                ++cnt_invalid_depth;
                 }
             }
         }
