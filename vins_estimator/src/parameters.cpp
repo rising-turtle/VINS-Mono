@@ -27,6 +27,7 @@ std::string IMU_TOPIC;
 double ROW, COL;
 double TD, TR;
 double nG = 1.;
+bool g_use_sampson_model = false;
 
 template <typename T>
 T readParam(ros::NodeHandle &n, std::string name)
@@ -50,7 +51,9 @@ void readParameters(ros::NodeHandle &n)
     config_file = readParam<std::string>(n, "config_file");
 
     n.param("gravity_norm", nG, nG);
+    n.param("use_sampson_model", g_use_sampson_model, g_use_sampson_model);
     ROS_INFO("parameters.cpp: gravity_norm: %lf", nG);
+    cout <<"parameters.cpp: "<< (g_use_sampson_model?"Yes use sampson model":"Not use sampson model")<<endl;
 
     cv::FileStorage fsSettings(config_file, cv::FileStorage::READ);
     if(!fsSettings.isOpened())

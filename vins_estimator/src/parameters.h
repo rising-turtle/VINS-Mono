@@ -38,6 +38,7 @@ extern int ESTIMATE_TD;
 extern int ROLLING_SHUTTER;
 extern double ROW, COL;
 extern double nG;
+extern bool g_use_sampson_model;
 
 void readParameters(ros::NodeHandle &n);
 

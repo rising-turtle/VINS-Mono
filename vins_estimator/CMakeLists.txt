@@ -42,6 +42,8 @@ add_executable(vins_estimator
     src/factor/projection_factor.cpp
     src/factor/projection_td_factor.cpp
     src/factor/marginalization_factor.cpp
+    src/factor/sampson_factor.cpp
+    src/factor/sampson_jacobian.cpp
     src/utility/utility.cpp
     src/utility/visualization.cpp
     src/utility/CameraPoseVisualization.cpp
@@ -52,6 +54,4 @@ add_executable(vins_estimator
     )
 
 
-target_link_libraries(vins_estimator ${catkin_LIBRARIES} ${OpenCV_LIBS} ${CERES_LIBRARIES}) 
-
-
+target_link_libraries(vins_estimator ${catkin_LIBRARIES} ${OpenCV_LIBS} ${CERES_LIBRARIES})

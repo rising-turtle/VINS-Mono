@@ -17,6 +17,7 @@
 #include "factor/projection_factor.h"
 #include "factor/projection_td_factor.h"
 #include "factor/marginalization_factor.h"
+#include "factor/sampson_factor.h"
 
 #include <unordered_map>
 #include <queue>
@@ -50,7 +51,7 @@ class Estimator
     bool failureDetection();
 
 
-    void showStatus(); 
+    void showStatus();
 
     enum SolverFlag
     {
