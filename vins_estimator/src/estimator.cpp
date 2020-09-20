@@ -787,6 +787,7 @@ void Estimator::optimization()
             }
             else
             {
+                // if(g_use_sampson_model && it_per_id.used_num > 4){ // for tum-vi cor1
                 if(g_use_sampson_model){ //  &&  para_Feature[feature_index])
                   SampsonFactorCross *f = new SampsonFactorCross(pts_i, pts_j);
                   problem.AddResidualBlock(f, loss_function, para_Pose[imu_i], para_Pose[imu_j], para_Ex_Pose[0], para_Feature[feature_index]);

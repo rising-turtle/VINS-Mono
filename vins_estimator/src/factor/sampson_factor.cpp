@@ -521,7 +521,7 @@ SampsonFactorCross::SampsonFactorCross(const Eigen::Vector3d &_pts_i, const Eige
 // const SampsonCostFunctor* functor)
  : pts_i(_pts_i), pts_j(_pts_j)//, functor_(functor)
 {
-    SampsonFactorCross::sqrt_info = 2400* Eigen::Matrix<double, 4, 4>::Identity(); // 700
+    SampsonFactorCross::sqrt_info = 2400* Eigen::Matrix<double, 4, 4>::Identity(); // 2400 700
 }
 
 bool SampsonFactorCross::Evaluate(double const *const *parameters, double *residuals, double **jacobians) const
