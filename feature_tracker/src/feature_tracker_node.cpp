@@ -238,7 +238,7 @@ int main(int argc, char **argv)
             trackerData[i].fisheye_mask = cv::imread(FISHEYE_MASK, 0);
             if(!trackerData[i].fisheye_mask.data)
             {
-                ROS_INFO("load mask fail");
+                ROS_INFO("load mask fail FISHEYE_MASK: %s", FISHEYE_MASK.c_str());
                 ROS_BREAK();
             }
             else
