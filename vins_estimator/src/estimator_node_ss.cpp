@@ -313,6 +313,7 @@ void process()
                 xyz_uv_velocity << x, y, z, p_u, p_v, velocity_x, velocity_y;
                 image[feature_id].emplace_back(camera_id,  xyz_uv_velocity);
             }
+            // cout <<" receive feature_points: "<<img_msg->points.size()<<" at "<<std::fixed<<img_msg->header.stamp.toSec()<<endl; 
             estimator.processImage(image, img_msg->header);
 
             double whole_t = t_s.toc();
@@ -344,7 +345,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "vins_estimator");
     ros::NodeHandle n("~");
-    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info); // Info
+    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug); // Info
     readParameters(n);
     estimator.setParameter();
 #ifdef EIGEN_DONT_PARALLELIZE

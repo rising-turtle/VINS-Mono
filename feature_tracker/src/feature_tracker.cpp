@@ -43,9 +43,9 @@ void FeatureTracker::setMask()
 
     // prefer to keep features that are tracked for long time
     vector<pair<int, pair<cv::Point2f, int>>> cnt_pts_id;
-
-    for (unsigned int i = 0; i < forw_pts.size(); i++)
+    for (unsigned int i = 0; i < forw_pts.size(); i++){
         cnt_pts_id.push_back(make_pair(track_cnt[i], make_pair(forw_pts[i], ids[i])));
+    }
 
     sort(cnt_pts_id.begin(), cnt_pts_id.end(), [](const pair<int, pair<cv::Point2f, int>> &a, const pair<int, pair<cv::Point2f, int>> &b)
          {
@@ -75,6 +75,7 @@ void FeatureTracker::addPoints()
         forw_pts.push_back(p);
         ids.push_back(-1);
         track_cnt.push_back(1);
+        // cout <<" new_pt: "<<" "<<p.x<<" "<<p.y<<endl; 
     }
 }
 
@@ -123,6 +124,7 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
         reduceVector(track_cnt, status);
 	      // ROS_INFO("KLT track %d features", forw_pts.size());
         // ROS_DEBUG("temporal optical flow costs: %fms", t_o.toc());
+        // printf("track cnt %d at %lf\n", (int)ids.size(), cur_time);
     }
 
     for (auto &n : track_cnt)
@@ -130,13 +132,15 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
 
     if (PUB_THIS_FRAME)
     {
+       // ROS_DEBUG("before F, cur_pts.size(): %d", cur_pts.size()); 
         rejectWithF();
-        ROS_DEBUG("set mask begins");
+       // ROS_DEBUG("afater F, cur_pts.size(): %d", cur_pts.size()); 
+        // ROS_DEBUG("set mask begins");
         TicToc t_m;
         setMask();
-        ROS_DEBUG("set mask costs %fms", t_m.toc());
+        // ROS_DEBUG("set mask costs %fms", t_m.toc());
 
-        ROS_DEBUG("detect feature begins");
+        // ROS_DEBUG("detect feature begins");
         TicToc t_t;
         int n_max_cnt = MAX_CNT - static_cast<int>(forw_pts.size());
         if (n_max_cnt > 0)
@@ -148,16 +152,21 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
             if (mask.size() != forw_img.size())
                 cout << "wrong size " << endl;
             cv::goodFeaturesToTrack(forw_img, n_pts, MAX_CNT - forw_pts.size(), 0.01, MIN_DIST, mask);
+            // cv::imwrite("mask2.png", mask); 
+            // cout <<" forw_pts.size(): "<<forw_pts.size()<<endl; 
         }
         else
             n_pts.clear();
 	      // ROS_INFO("MAX_CNT: %d fort_pts.size(): %d", MAX_CNT, forw_pts.size() );
         // ROS_DEBUG("detect feature costs: %fms max_cnt: %d detect %d new features ", t_t.toc(), n_max_cnt, n_pts.size());
+        
+        ROS_DEBUG("feature_tracker: detect new %d points", n_pts.size()); 
 
         // ROS_DEBUG("add feature begins");
         TicToc t_a;
         addPoints();
         // ROS_DEBUG("selectFeature costs: %fms", t_a.toc());
+        // printf("feature cnt after add %d\n", (int)ids.size());
     }
     prev_img = cur_img;
     prev_pts = cur_pts;
@@ -207,8 +216,10 @@ bool FeatureTracker::updateID(unsigned int i)
 {
     if (i < ids.size())
     {
-        if (ids[i] == -1)
+        if (ids[i] == -1){
             ids[i] = n_id++;
+            // cout<<"n_id: "<<n_id<<" "<<cur_pts[i].x<<" "<<cur_pts[i].y<<endl;
+        }
         return true;
     }
     else
@@ -257,7 +268,7 @@ void FeatureTracker::showUndistortion(const string &name)
     cv::waitKey(0);
 }
 
-void FeatureTracker::undistortedPoints()
+void FeatureTracker:: undistortedPoints()
 {
     cur_un_pts.clear();
     cur_un_pts_map.clear();

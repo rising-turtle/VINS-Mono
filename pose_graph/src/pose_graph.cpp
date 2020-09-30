@@ -522,7 +522,12 @@ void PoseGraph::optimize4DoF()
             ceres::Solve(options, &problem, &summary);
             //std::cout << summary.BriefReport() << "\n";
             
-            //printf("pose optimization time: %f \n", tmp_t.toc());
+            printf("pose optimization time: %f \n", tmp_t.toc());
+            static double total_t = 0; 
+            static int cnt = 0; 
+            total_t += tmp_t.toc();
+            ROS_INFO("pose graph optimization total: %lf ms, average: %lf ", total_t, total_t/(++cnt));
+
             /*
             for (int j = 0 ; j < i; j++)
             {

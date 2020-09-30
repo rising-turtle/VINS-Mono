@@ -413,12 +413,18 @@ void process()
 
                 KeyFrame* keyframe = new KeyFrame(pose_msg->header.stamp.toSec(), frame_index, T, R, image,
                                    point_3d, point_2d_uv, point_2d_normal, point_id, sequence);   
+
+                TicToc t_lc; 
                 m_process.lock();
                 start_flag = 1;
                 posegraph.addKeyFrame(keyframe, 1);
                 m_process.unlock();
                 frame_index++;
                 last_t = T;
+                static double total_t = 0; 
+                static int cnt = 0; 
+                total_t += t_lc.toc(); 
+                // ROS_INFO("loop closure total: %lf ms, average: %lf ", total_t, total_t/(++cnt));
             }
         }
 

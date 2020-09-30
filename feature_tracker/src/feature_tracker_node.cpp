@@ -27,6 +27,8 @@ bool init_pub = 0;
 
 void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
 {
+    static int cnt = 0; 
+    // ROS_WARN("received img_msg timestamp: %lf", img_msg->header.stamp.toSec());
     if(first_image_flag)
     {
         first_image_flag = false;
@@ -50,7 +52,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     // frequency control
     if (round(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time)) <= FREQ)
     {
-       // ROS_INFO("feature_node: first_image_time: %lf current_time: %lf now publish", first_image_time, img_msg->header.stamp.toSec());
+        ROS_INFO("feature_node: first_image_time: %lf current_time: %lf now publish", first_image_time, img_msg->header.stamp.toSec());
         PUB_THIS_FRAME = true;
         // reset the frequency control
         if (abs(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time) - FREQ) < 0.01 * FREQ)
@@ -148,6 +150,7 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
             auto &cur_pts = trackerData[i].cur_pts;
             auto &ids = trackerData[i].ids;
             auto &pts_velocity = trackerData[i].pts_velocity;
+            cout <<" before send ids size: "<<ids.size()<<endl;
             for (unsigned int j = 0; j < ids.size(); j++)
             {
                 if (trackerData[i].track_cnt[j] > 1)
@@ -161,6 +164,8 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
 
                     feature_points->points.push_back(p);
                     id_of_point.values.push_back(p_id * NUM_OF_CAM + i);
+                    // The following setting is just for debug: feature tracker + vins_estimator_stereo  
+                    // id_of_point.values.push_back(p_id * 2 + i);
                     u_of_point.values.push_back(cur_pts[j].x);
                     v_of_point.values.push_back(cur_pts[j].y);
                     velocity_x_of_point.values.push_back(pts_velocity[j].x);
@@ -168,12 +173,17 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
                 }
             }
         }
+        // cout <<" send feature_points: "<<feature_points->points.size()<<" at "<<std::fixed<<feature_points->header.stamp.toSec()<<endl;
         feature_points->channels.push_back(id_of_point);
         feature_points->channels.push_back(u_of_point);
         feature_points->channels.push_back(v_of_point);
         feature_points->channels.push_back(velocity_x_of_point);
         feature_points->channels.push_back(velocity_y_of_point);
-        // ROS_INFO("publish %f, at %f with %d features ", feature_points->header.stamp.toSec(), ros::Time::now().toSec(),   feature_points->points.size());
+        
+        // static ofstream ouf2("history2.txt"); 
+        ROS_INFO("cnt = %d publish %f, at %f with %d features ", ++cnt, feature_points->header.stamp.toSec(), ros::Time::now().toSec(),   feature_points->points.size());
+        // ouf2<<"cnt = "<<cnt<<" publish "<<feature_points->header.stamp.toSec()<<" with "<<feature_points->points.size()<<" features "<<endl; 
+        
         // skip the first image; since no optical speed on frist image
         if (!init_pub)
         {
@@ -225,7 +235,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "feature_tracker");
     ros::NodeHandle n("~");
-    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info); // Debug Info
+    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug); // Debug Info
     readParameters(n);
 
     for (int i = 0; i < NUM_OF_CAM; i++)
