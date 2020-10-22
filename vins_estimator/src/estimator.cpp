@@ -190,7 +190,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
                 solver_flag = NON_LINEAR;
 		            // print its result for debug
                 // ROS_INFO("Initialization finish!");
-                // showStatus();
+                showStatus();
 
                 solveOdometry();
                 slideWindow();
@@ -819,7 +819,18 @@ void Estimator::optimization()
                   problem.AddResidualBlock(f, loss_function, para_Pose[imu_i], para_Pose[imu_j], para_Ex_Pose[0], para_Feature[feature_index]);
                 }else{
                   ProjectionFactor *f = new ProjectionFactor(pts_i, pts_j);
-                  problem.AddResidualBlock(f, loss_function, para_Pose[imu_i], para_Pose[imu_j], para_Ex_Pose[0], para_Feature[feature_index]);
+                  ceres::ResidualBlockId fid = problem.AddResidualBlock(f, loss_function, para_Pose[imu_i], para_Pose[imu_j], para_Ex_Pose[0], para_Feature[feature_index]);
+
+                    if(0){
+                        static ofstream ouf("mono_debug.txt"); 
+                        vector<double*>* para = new vector<double*>;  
+                        problem.GetParameterBlocksForResidualBlock(fid, para); 
+                        vector<double> res(2); 
+                        f->Evaluate(&para[0][0], &res[0], 0); 
+                        // cout<<"estimator.cpp: residual: "<<res[0]<<" "<<res[1]<<endl;
+                        ouf << f_m_cnt<<" "<<pts_i.transpose()<<" "<<pts_j.transpose()<<" "<<para_Feature[feature_index][0]<<" "<< res[0]<<" "<<res[1]<<endl;
+                    }
+
                 }
             }
             f_m_cnt++;
@@ -882,6 +893,7 @@ void Estimator::optimization()
     //cout << summary.BriefReport() << endl;
     ROS_DEBUG("Iterations : %d", static_cast<int>(summary.iterations.size()));
     ROS_DEBUG("solver costs: %f", t_solver.toc());
+    // exit(0); 
 
     double2vector();
 

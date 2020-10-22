@@ -123,7 +123,7 @@ void readParameters(ros::NodeHandle &n)
 
     }
 
-    INIT_DEPTH = 5.0;
+    INIT_DEPTH = 15.0;
     BIAS_ACC_THRESHOLD = 0.1;
     BIAS_GYR_THRESHOLD = 0.1;
 
