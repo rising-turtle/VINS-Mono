@@ -5,7 +5,7 @@
 # TODO: change these topics 
 imu_topic: "/imu"
 image_topic: "/cam0/color" # "/cam0/color" "/cam0/image_raw"
-output_path: "vins_result.csv"         # vins outputs will be wrttento vins_folder_path + output_path
+output_path: "/home/davidz/work/result"         # vins outputs will be wrttento vins_folder_path + output_path
 
     #camera calibration 
 model_type: PINHOLE
